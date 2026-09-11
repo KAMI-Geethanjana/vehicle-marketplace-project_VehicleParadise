@@ -29,6 +29,19 @@ export default function VehicleListingPage({
     if (minPrice && v.price < parseInt(minPrice)) return false;
     if (maxPrice && v.price > parseInt(maxPrice)) return false;
 
+    if (yearRange) {
+      const parts = yearRange.split(/[-—]/);
+      if (parts.length === 2) {
+        const minY = parseInt(parts[0].trim(), 10);
+        const maxY = parseInt(parts[1].trim(), 10);
+        if (!isNaN(minY) && v.year < minY) return false;
+        if (!isNaN(maxY) && v.year > maxY) return false;
+      } else if (parts.length === 1) {
+        const exactY = parseInt(parts[0].trim(), 10);
+        if (!isNaN(exactY) && v.year !== exactY) return false;
+      }
+    }
+
     return true;
   });
 
