@@ -1,120 +1,156 @@
-import React from 'react';
-import { ShieldCheck, Zap, Award, ArrowRight, ChevronRight, Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search } from 'lucide-react';
 
-export default function Hero({ onExploreClick, onQuickReserve }) {
+export default function Hero({ onExploreClick }) {
+  const [activeTab, setActiveTab] = useState('Cars');
+
+  const bodyTypes = [
+    { name: 'Compact', icon: 'bi-car-front' },
+    { name: 'SUV', icon: 'bi-shield-shaded' },
+    { name: 'Transporter', icon: 'bi-truck' },
+    { name: 'Convertible', icon: 'bi-brightness-high' },
+    { name: 'Van', icon: 'bi-truck-flatbed' },
+    { name: 'Sedan', icon: 'bi-car-front-fill' }
+  ];
+
+  const brands = [
+    { name: 'Mercedes', url: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg' },
+    { name: 'Volkswagen', url: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.svg' },
+    { name: 'BMW', url: 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg' },
+    { name: 'Audi', url: 'https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg' },
+    { name: 'Ford', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Ford_Motor_Company_Logo.svg' },
+    { name: 'Toyota', url: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg' }
+  ];
+
   return (
-    <section className="relative overflow-hidden pt-8 pb-12 lg:py-16">
+    <div className="w-full relative pb-16 bg-slate-50 dark:bg-dark-950">
       
-      {/* Ambient background glows */}
-      <div className="absolute top-10 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-10 right-10 w-80 h-80 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Full bleed Background */}
+      <div className="relative w-full h-[400px] sm:h-[500px] overflow-hidden">
+        <img 
+          src="/hero_supercar.jpg" 
+          alt="Hero Background" 
+          className="w-full h-full object-cover brightness-75"
+          style={{ animation: 'dynamicPan 10s ease-in-out infinite alternate' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
+        
+        {/* Headline */}
+        <div className="absolute top-1/4 left-0 right-0 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+          <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-outfit font-black tracking-tight max-w-2xl drop-shadow-xl">
+            Sri Lanka's largest <br/> car marketplace
+          </h1>
+        </div>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      {/* Floating Search Card */}
+      <div 
+        className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 sm:-mt-24"
+        style={{ animation: 'fadeInUp 0.8s ease-out 0.2s forwards', opacity: 0 }}
+      >
+        <div className="bg-white dark:bg-dark-900 rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800">
           
-          {/* Left Text Column */}
-          <div className="lg:col-span-7 space-y-6">
-            
-            {/* Top Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold tracking-wide">
-              <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              <span>THE ULTIMATE AUTOMOTIVE SANCTUARY</span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="font-outfit font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none">
-              Drive The World’s <br className="hidden sm:inline" />
-              <span className="gold-gradient-text">Most Elite Hypercars</span> & Luxury Fleet.
-            </h1>
-
-            <p className="text-slate-400 text-base sm:text-lg max-w-2xl leading-relaxed">
-              Vehicle Paradise gives you instant access to hand-picked supercars, executive V12 luxury sedans, and futuristic electric hypercars with VIP door-to-door concierge delivery.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+          {/* Tabs */}
+          <div className="flex gap-6 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto scrollbar-hide">
+            {['Cars', 'Motorcycles', 'Commercial'].map(tab => (
               <button 
-                onClick={onExploreClick}
-                className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-outfit font-bold rounded-xl text-sm shadow-glow transition-all hover:scale-105"
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`text-sm font-bold pb-4 -mb-4 whitespace-nowrap transition-colors ${activeTab === tab ? 'text-slate-900 dark:text-white border-b-[3px] border-slate-900 dark:border-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               >
-                <span>Browse Marketplace</span>
-                <ArrowRight className="w-4 h-4" />
+                {tab}
               </button>
-
-              <button 
-                onClick={onQuickReserve}
-                className="flex items-center gap-2 px-6 py-3.5 bg-dark-800/80 hover:bg-dark-700 border border-slate-700 text-slate-200 font-outfit font-semibold rounded-xl text-sm transition-all hover:border-amber-500/50"
-              >
-                <span>Quick Reserve GT900</span>
-                <ChevronRight className="w-4 h-4 text-amber-400" />
-              </button>
-            </div>
-
-            {/* Trust Metrics Grid */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800/80 max-w-lg">
-              <div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  <span className="font-outfit font-bold text-xl text-white">4.98 / 5</span>
-                </div>
-                <p className="text-xs text-slate-400">VIP Rating</p>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-1">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span className="font-outfit font-bold text-xl text-white">100%</span>
-                </div>
-                <p className="text-xs text-slate-400">Insured Fleet</p>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-1">
-                  <Award className="w-4 h-4 text-amber-400" />
-                  <span className="font-outfit font-bold text-xl text-white">50+</span>
-                </div>
-                <p className="text-xs text-slate-400">Exotic Models</p>
-              </div>
-            </div>
-
+            ))}
           </div>
 
-          {/* Right Supercar Card Visualizer */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-2xl p-1 bg-gradient-to-b from-amber-500/30 via-slate-800/40 to-slate-900 glass-panel shadow-card-glow group">
-              
-              <div className="relative rounded-xl overflow-hidden aspect-[16/10]">
-                <img 
-                  src="/hero_supercar.png" 
-                  alt="Apex Speedster GT900 Hypercar" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                
-                {/* Badge Overlay */}
-                <div className="absolute top-3 left-3 bg-dark-900/80 backdrop-blur-md px-3 py-1 rounded-full border border-amber-500/40 text-amber-400 text-xs font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                  Flagship Vehicle
-                </div>
+          {/* Search Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-6">
+            <div className="md:col-span-3">
+              <select className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 appearance-none shadow-sm cursor-pointer text-slate-900 dark:text-white">
+                <option>Sri Lanka</option>
+                <option>Colombo</option>
+                <option>Kandy</option>
+              </select>
+            </div>
+            <div className="md:col-span-4">
+              <select className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 appearance-none shadow-sm cursor-pointer text-slate-900 dark:text-white">
+                <option>Makes and models</option>
+                <option>Toyota</option>
+                <option>Honda</option>
+                <option>Nissan</option>
+                <option>BMW</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <input 
+                type="text" 
+                placeholder="City/ZIP" 
+                className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 shadow-sm text-slate-900 dark:text-white placeholder-slate-400"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <button 
+                onClick={onExploreClick}
+                className="w-full h-full py-3.5 bg-[#008880] hover:bg-[#007068] text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                2,134,574 results
+              </button>
+            </div>
+          </div>
 
-                {/* Bottom Overlay Card */}
-                <div className="absolute bottom-3 left-3 right-3 glass-panel p-3.5 rounded-xl border border-white/10 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-outfit font-bold text-sm text-white">Apex Speedster GT900</h3>
-                    <p className="text-xs text-amber-400 font-mono">920 HP • 0-60 in 2.3s</p>
+          <div className="text-right mt-3 mb-6">
+            <button className="text-[#076fe6] text-sm font-bold hover:underline">
+              Refine search
+            </button>
+          </div>
+
+          {/* Body Types */}
+          <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+            <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-6">Find used vehicles and new vehicles</p>
+            <div className="flex flex-wrap gap-4 sm:gap-8 justify-between px-2">
+              {bodyTypes.map(type => (
+                <div key={type.name} onClick={() => onExploreClick({ searchMake: type.name })} className="flex flex-col items-center gap-2 cursor-pointer group w-16 sm:w-20">
+                  <div className="w-16 h-10 flex items-center justify-center text-slate-700 dark:text-slate-300 group-hover:scale-110 transition-transform">
+                    <i className={`bi ${type.icon} text-4xl`}></i>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Daily Rate</span>
-                    <span className="font-outfit font-black text-amber-400 text-sm">$1,850 / day</span>
-                  </div>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-400 text-center whitespace-nowrap">{type.name}</span>
                 </div>
-
-              </div>
-
+              ))}
             </div>
           </div>
 
         </div>
       </div>
-    </section>
+
+      {/* Popular Brands */}
+      <div 
+        className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pb-10"
+        style={{ animation: 'fadeInUp 0.8s ease-out 0.4s forwards', opacity: 0 }}
+      >
+        <h2 className="text-2xl font-outfit font-black text-slate-900 dark:text-white mb-10 text-left">Popular Brands</h2>
+        <div className="flex flex-wrap justify-between items-center gap-6">
+          {brands.map(brand => (
+            <div key={brand.name} onClick={() => onExploreClick({ searchMake: brand.name })} className="flex flex-col items-center gap-3 cursor-pointer group">
+              <div className="w-20 h-20 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center bg-white shadow-sm group-hover:shadow-md transition-shadow overflow-hidden p-3">
+                <img src={brand.url} alt={brand.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+              </div>
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{brand.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes dynamicPan {
+          0% { transform: scale(1.05) translate(0, 0); filter: brightness(0.8); }
+          50% { transform: scale(1.15) translate(-2%, 1%); filter: brightness(1.1); }
+          100% { transform: scale(1.05) translate(2%, -1%); filter: brightness(0.8); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}} />
+    </div>
   );
 }

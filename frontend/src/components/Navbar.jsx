@@ -7,7 +7,9 @@ export default function Navbar({
   theme, 
   toggleTheme, 
   favoritesCount, 
-  unreadMessagesCount 
+  unreadMessagesCount,
+  user,
+  onLogout
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -102,13 +104,33 @@ export default function Navbar({
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentView('auth')}
-                className="px-5 py-2.5 bg-slate-900 dark:bg-amber-500 hover:bg-slate-800 dark:hover:bg-amber-400 text-white dark:text-slate-900 font-bold rounded-full text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-              >
-                <User className="w-4 h-4" />
-                Sign In
-              </button>
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setCurrentView('profile')}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-dark-800 hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-900 dark:text-white font-bold rounded-full text-sm transition-all shadow-sm cursor-pointer"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-cyan-500 flex items-center justify-center text-white text-xs">
+                      {user.name.charAt(0)}
+                    </div>
+                    {user.name.split(' ')[0]}
+                  </button>
+                  <button
+                    onClick={onLogout}
+                    className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 font-bold rounded-full text-sm transition-all shadow-sm cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setCurrentView('auth')}
+                  className="px-5 py-2.5 bg-slate-900 dark:bg-amber-500 hover:bg-slate-800 dark:hover:bg-amber-400 text-white dark:text-slate-900 font-bold rounded-full text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
+                >
+                  <User className="w-4 h-4" />
+                  Sign In
+                </button>
+              )}
             </div>
           </div>
 
@@ -170,12 +192,29 @@ export default function Navbar({
               </button>
             </div>
             
-            <button 
-              onClick={() => { setCurrentView('auth'); setMobileMenuOpen(false); }}
-              className="w-full mt-2 flex items-center justify-center gap-2 p-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-sm"
-            >
-              <User className="w-4 h-4" /> Sign In
-            </button>
+            {user ? (
+              <>
+                <button 
+                  onClick={() => { setCurrentView('profile'); setMobileMenuOpen(false); }}
+                  className="w-full mt-2 flex items-center justify-center gap-2 p-3 bg-slate-100 dark:bg-dark-800 text-slate-900 dark:text-white rounded-xl font-bold text-sm cursor-pointer"
+                >
+                  <User className="w-4 h-4" /> My Profile
+                </button>
+                <button 
+                  onClick={() => { onLogout(); setMobileMenuOpen(false); }}
+                  className="w-full mt-2 flex items-center justify-center gap-2 p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl font-bold text-sm cursor-pointer"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button 
+                onClick={() => { setCurrentView('auth'); setMobileMenuOpen(false); }}
+                className="w-full mt-2 flex items-center justify-center gap-2 p-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-sm cursor-pointer"
+              >
+                <User className="w-4 h-4" /> Sign In
+              </button>
+            )}
           </div>
         </div>
       )}

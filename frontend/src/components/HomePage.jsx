@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Hero from './Hero';
 
 export default function HomePage({ vehicles, onSelectVehicle, onSelectCategory, onNavigateBrowse }) {
   const categories = [
@@ -13,19 +14,16 @@ export default function HomePage({ vehicles, onSelectVehicle, onSelectCategory, 
   const featuredVehicles = vehicles.filter(v => v.verified).slice(0, 4);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+    <div className="w-full">
       
-      {/* Hero Header Section */}
-      <section className="pt-8 pb-4">
-        <div className="space-y-3">
-          <h1 className="font-outfit font-black text-4xl sm:text-5xl lg:text-6xl text-slate-900 dark:text-white tracking-tight">
-            Find your next journey
-          </h1>
-          <p className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl">
-            Browse verified vehicles from trusted sellers and dealers across Sri Lanka.
-          </p>
-        </div>
-      </section>
+      {/* Advanced Hero Section */}
+      <Hero 
+        onExploreClick={(filters) => onNavigateBrowse(filters || {})} 
+        onQuickReserve={() => onNavigateBrowse({})} 
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
 
       {/* Popular Categories Grid */}
       <section className="space-y-6">
@@ -104,6 +102,7 @@ export default function HomePage({ vehicles, onSelectVehicle, onSelectCategory, 
         </div>
       </section>
 
+      </div>
     </div>
   );
 }

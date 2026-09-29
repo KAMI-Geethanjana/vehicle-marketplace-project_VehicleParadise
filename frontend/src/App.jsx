@@ -9,6 +9,7 @@ import MessagesPage from './components/MessagesPage';
 import SellVehiclePage from './components/SellVehiclePage';
 import AuthPage from './components/AuthPage';
 import FavoritesPage from './components/FavoritesPage';
+import ProfileDashboard from './components/ProfileDashboard';
 import ComparePage from './components/ComparePage';
 import FinancePage from './components/FinancePage';
 import ContactPage from './components/ContactPage';
@@ -21,12 +22,19 @@ import { VEHICLES } from './data/vehicles';
 
 export default function App() {
   const [vehicles, setVehicles] = useState(VEHICLES);
-  const [currentView, setCurrentView] = useState('home'); // 'home', 'browse', 'details', 'reservation', 'checkout', 'messages', 'sell', 'auth', 'favorites', 'compare', 'finance', 'contact', 'dealers', 'admin', 'mydashboard'
+  const [currentView, setCurrentView] = useState('home'); 
   const [theme, setTheme] = useState('light');
+  const [user, setUser] = useState(null);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setCurrentView('home');
+  };
 
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [reservedVehicle, setReservedVehicle] = useState(null);
-  const [favorites, setFavorites] = useState(['v1', 'v2', 'v3', 'v4']);
+  const [favorites, setFavorites] = useState([]);
   const [listingFilters, setListingFilters] = useState({});
 
   useEffect(() => {
@@ -85,6 +93,8 @@ export default function App() {
         toggleTheme={toggleTheme}
         favoritesCount={favorites.length}
         unreadMessagesCount={1}
+        user={user}
+        onLogout={handleLogout}
       />
 
       {/* Main View Router */}
@@ -139,21 +149,22 @@ export default function App() {
         )}
 
         {currentView === 'sell' && (
-          <SellVehiclePage
-            onVehicleAdded={handleAddUserVehicle}
-          />
+          user ? <SellVehiclePage onVehicleAdded={handleAddUserVehicle} /> : <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('sell'); }} />
         )}
 
         {currentView === 'auth' && (
           <AuthPage
-            onAuthSuccess={() => setCurrentView('mydashboard')}
+            onAuthSuccess={(u) => { setUser(u); setCurrentView('profile'); }}
           />
+        )}
+
+        {currentView === 'profile' && (
+          user ? <ProfileDashboard user={user} onLogout={handleLogout} /> : <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('profile'); }} />
         )}
 
         {currentView === 'favorites' && (
           <FavoritesPage
-            vehicles={vehicles}
-            favorites={favorites}
+            favorites={vehicles.filter(v => favorites.includes(v.id))}
             onSelectVehicle={handleSelectVehicle}
             onNavigateCompare={() => setCurrentView('compare')}
           />
@@ -186,9 +197,7 @@ export default function App() {
         )}
 
         {currentView === 'mydashboard' && (
-          <MyDashboardPage
-            onListVehicle={() => setCurrentView('sell')}
-          />
+          user ? <MyDashboardPage onListVehicle={() => setCurrentView('sell')} onNavigateBrowse={() => setCurrentView('browse')} /> : <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('mydashboard'); }} />
         )}
 
         {currentView === 'cart' && (

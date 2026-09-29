@@ -117,7 +117,7 @@ export default function FinancePage() {
 
           <button
             onClick={() => {}}
-            className="w-full py-3.5 bg-amber-600 dark:bg-amber-500 hover:bg-amber-500 dark:hover:bg-amber-400 text-slate-900 font-outfit font-extrabold rounded-xl text-xs shadow-sm transition-all"
+            className="w-full py-3.5 bg-amber-600 dark:bg-amber-500 hover:bg-amber-500 dark:hover:bg-amber-400 text-white font-outfit font-extrabold rounded-xl text-xs shadow-sm transition-all"
           >
             Explore finance partners
           </button>
