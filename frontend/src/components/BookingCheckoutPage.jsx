@@ -18,6 +18,9 @@ export default function BookingCheckoutPage({ reservedVehicle, onCheckoutComplet
     agreed: false
   });
 
+  const [createAccount, setCreateAccount] = useState(false);
+  const [password, setPassword] = useState('');
+  const isAuthenticated = !!localStorage.getItem('token');
   const [isSuccess, setIsSuccess] = useState(false);
   const payhereFormRef = useRef(null);
 
@@ -33,9 +36,34 @@ export default function BookingCheckoutPage({ reservedVehicle, onCheckoutComplet
   const hashedSecret = CryptoJS.MD5(merchantSecret).toString().toUpperCase();
   const hash = CryptoJS.MD5(merchantId + orderId + formattedAmount + currency + hashedSecret).toString().toUpperCase();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Save order to database
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          total_amount: amount,
+          customer_name: `${formData.firstName} ${formData.lastName}`,
+          customer_email: formData.email,
+          customer_phone: formData.phone,
+          items: [{
+            product_id: reservedVehicle.id, // Ensure this maps to the _id
+            quantity: 1,
+            unit_price: amount
+          }]
+        })
+      });
+    } catch (error) {
+      console.error('Failed to create order in DB:', error);
+    }
+
     if (formData.paymentMethod === 'PayHere') {
       // Submit the hidden PayHere form
       if (payhereFormRef.current) {

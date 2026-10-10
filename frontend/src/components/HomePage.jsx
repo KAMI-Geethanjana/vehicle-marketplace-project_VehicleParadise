@@ -1,7 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Hero from './Hero';
 
 export default function HomePage({ vehicles, onSelectVehicle, onSelectCategory, onNavigateBrowse }) {
+  const [ads, setAds] = useState([]);
+
+  useEffect(() => {
+    const fetchAds = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/ads');
+        if (res.ok) {
+          const data = await res.json();
+          setAds(data);
+        }
+      } catch (error) {
+        console.error('Error fetching ads', error);
+      }
+    };
+    fetchAds();
+  }, []);
+
   const categories = [
     { name: 'Cars', icon: 'bi-car-front-fill' },
     { name: 'SUVs', icon: 'bi-shield-shaded' },
@@ -23,6 +40,27 @@ export default function HomePage({ vehicles, onSelectVehicle, onSelectCategory, 
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+      {/* Ads Banner Section */}
+      {ads.length > 0 && (
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {ads.map(ad => (
+              <a key={ad.id} href={ad.link} target="_blank" rel="noopener noreferrer" className="block relative group overflow-hidden rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                <div className="aspect-[21/9] bg-slate-200 dark:bg-dark-800">
+                  <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                </div>
+                <div className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
+                  AD
+                </div>
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                  <h3 className="text-white font-bold truncate">{ad.title}</h3>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
 
       {/* Popular Categories Grid */}

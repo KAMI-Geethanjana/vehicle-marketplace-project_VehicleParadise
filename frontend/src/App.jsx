@@ -21,8 +21,23 @@ import CartPage from './components/CartPage';
 import { VEHICLES } from './data/vehicles';
 
 export default function App() {
-  const [vehicles, setVehicles] = useState(VEHICLES);
+  const [vehicles, setVehicles] = useState([]);
   const [currentView, setCurrentView] = useState('home'); 
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setVehicles(data);
+        setLoadingProducts(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch products:', err);
+        setVehicles(VEHICLES); // Fallback to hardcoded if backend is down
+        setLoadingProducts(false);
+      });
+  }, []); 
   const [theme, setTheme] = useState('light');
   const [user, setUser] = useState(null);
 
@@ -138,10 +153,14 @@ export default function App() {
         )}
 
         {currentView === 'checkout' && (
-          <BookingCheckoutPage
-            reservedVehicle={reservedVehicle || vehicles[0]}
-            onCheckoutComplete={() => setCurrentView('home')}
-          />
+          user ? (
+            <BookingCheckoutPage
+              reservedVehicle={reservedVehicle || vehicles[0]}
+              onCheckoutComplete={() => setCurrentView('home')}
+            />
+          ) : (
+            <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('checkout'); }} />
+          )
         )}
 
         {currentView === 'messages' && (
