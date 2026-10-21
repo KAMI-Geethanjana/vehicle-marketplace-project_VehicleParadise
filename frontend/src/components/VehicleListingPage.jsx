@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Heart, Filter, Check, Tag } from 'lucide-react';
+import { Heart, Filter, Check, Tag, ShoppingCart } from 'lucide-react';
 
 export default function VehicleListingPage({ 
   vehicles, 
   onSelectVehicle, 
-  favorites, 
+  favorites = [], 
   onToggleFavorite,
+  onAddToCart,
+  cart = [],
   initialFilters = {} 
 }) {
   const [selectedMake, setSelectedMake] = useState(initialFilters.searchMake || 'All makes');
@@ -288,15 +290,38 @@ export default function VehicleListingPage({
                         </div>
                       )}
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleFavorite(v.id);
-                        }}
-                        className="absolute top-3 right-3 p-2 rounded-full bg-white/80 dark:bg-dark-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-amber-500 transition-colors"
-                      >
-                        <Heart className={`w-4 h-4 ${isSaved ? 'fill-rose-500 text-rose-500' : ''}`} />
-                      </button>
+                      {/* Favorite and Quick Cart Buttons */}
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onAddToCart) onAddToCart(v);
+                          }}
+                          className={`p-2 rounded-full backdrop-blur-md border transition-all ${
+                            Array.isArray(cart) && cart.some(c => c.id === v.id)
+                              ? 'bg-amber-500 text-white border-amber-500 shadow-md'
+                              : 'bg-white/90 dark:bg-dark-900/90 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-amber-500 hover:bg-white'
+                          }`}
+                          title={Array.isArray(cart) && cart.some(c => c.id === v.id) ? 'In Cart' : 'Add to Cart'}
+                          aria-label="Add to cart"
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite(v.id);
+                          }}
+                          className="p-2 rounded-full bg-white/90 dark:bg-dark-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-rose-500 transition-colors"
+                          title="Save to favorites"
+                          aria-label="Save to favorites"
+                        >
+                          <Heart className={`w-4 h-4 ${Array.isArray(favorites) && favorites.includes(v.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="p-4 space-y-2">

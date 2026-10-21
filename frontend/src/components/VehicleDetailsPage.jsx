@@ -6,7 +6,9 @@ export default function VehicleDetailsPage({
   onSaveVehicle, 
   isSaved, 
   onMessageSeller, 
-  onReserveViewing 
+  onReserveViewing,
+  onAddToCart,
+  isInCart
 }) {
   if (!vehicle) return null;
 
@@ -208,19 +210,21 @@ export default function VehicleDetailsPage({
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons with finger-friendly min-h-[48px] */}
             <div className="space-y-3 pt-2">
               <button
-                onClick={() => onSaveVehicle()}
-                className={`w-full py-3 px-4 ${isSaved ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-800 dark:bg-dark-700 hover:bg-slate-900 text-white'} font-outfit font-extrabold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center gap-2`}
+                onClick={() => {
+                  if (onAddToCart) onAddToCart(vehicle);
+                }}
+                className={`w-full py-3.5 px-4 min-h-[48px] ${isInCart ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-800 dark:bg-dark-700 hover:bg-slate-900 text-white'} font-outfit font-extrabold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer`}
               >
-                <ShoppingCart className={`w-4 h-4 ${isSaved ? 'fill-white text-white' : ''}`} />
-                <span>{isSaved ? 'Added to Cart' : 'Add to Cart'}</span>
+                <ShoppingCart className={`w-4 h-4 ${isInCart ? 'fill-white text-white' : ''}`} />
+                <span>{isInCart ? 'Added to Cart ✓' : 'Add to Cart'}</span>
               </button>
 
               <button
                 onClick={() => onReserveViewing(vehicle)}
-                className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white font-outfit font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm"
+                className="w-full py-3.5 px-4 min-h-[48px] bg-amber-500 hover:bg-amber-600 text-white font-outfit font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
               >
                 <Tag className="w-4 h-4" />
                 <span>Reserve / Checkout</span>

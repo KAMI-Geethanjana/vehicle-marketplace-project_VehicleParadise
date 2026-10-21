@@ -49,7 +49,43 @@ export default function App() {
 
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [reservedVehicle, setReservedVehicle] = useState(null);
-  const [favorites, setFavorites] = useState([]);
+
+  // Persistent Favorites in localStorage
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vp_favorites');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('vp_favorites', JSON.stringify(favorites));
+    } catch (e) {
+      console.error('Failed to save favorites to localStorage:', e);
+    }
+  }, [favorites]);
+
+  // Persistent Cart in localStorage (Fixes Week 09 Common Bug #3: Cart empties on refresh)
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vp_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('vp_cart', JSON.stringify(cart));
+    } catch (e) {
+      console.error('Failed to save cart to localStorage:', e);
+    }
+  }, [cart]);
+
   const [listingFilters, setListingFilters] = useState({});
 
   useEffect(() => {
@@ -73,6 +109,51 @@ export default function App() {
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
+
+  // Cart operations with input sanitization and zero/negative protection
+  const handleAddToCart = (vehicle, quantity = 1) => {
+    const validQty = Math.max(1, parseInt(quantity, 10) || 1);
+    setCart(prev => {
+      const existingIndex = prev.findIndex(item => item.id === vehicle.id);
+      if (existingIndex > -1) {
+        return prev.map((item, idx) => 
+          idx === existingIndex 
+            ? { ...item, quantity: (parseInt(item.quantity, 10) || 1) + validQty }
+            : item
+        );
+      }
+      return [...prev, {
+        id: vehicle.id,
+        name: vehicle.name,
+        shortName: vehicle.shortName || vehicle.name,
+        make: vehicle.make,
+        price: parseFloat(vehicle.price) || 0,
+        priceDisplay: vehicle.priceDisplay || `Rs. ${vehicle.price?.toLocaleString()}`,
+        image: vehicle.image,
+        location: vehicle.location,
+        condition: vehicle.condition,
+        quantity: validQty
+      }];
+    });
+  };
+
+  const handleUpdateCartQuantity = (id, newQuantity) => {
+    // Math accuracy & disallow zero/negative quantities (Week 09 Task 3)
+    const validQty = Math.max(1, parseInt(newQuantity, 10) || 1);
+    setCart(prev =>
+      prev.map(item => (item.id === id ? { ...item, quantity: validQty } : item))
+    );
+  };
+
+  const handleRemoveFromCart = (id) => {
+    setCart(prev => prev.filter(item => item.id !== id));
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+  };
+
+  const cartCount = cart.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 1), 0);
 
   const handleSelectVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);
@@ -98,7 +179,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col transition-colors duration-300 app-bg">
+    <div className="min-h-screen flex flex-col transition-colors duration-300 app-bg overflow-x-hidden w-full">
       
       {/* Top Navbar */}
       <Navbar
@@ -107,6 +188,7 @@ export default function App() {
         theme={theme}
         toggleTheme={toggleTheme}
         favoritesCount={favorites.length}
+        cartCount={cartCount}
         unreadMessagesCount={1}
         user={user}
         onLogout={handleLogout}
@@ -129,6 +211,8 @@ export default function App() {
             onSelectVehicle={handleSelectVehicle}
             favorites={favorites}
             onToggleFavorite={handleToggleFavorite}
+            onAddToCart={handleAddToCart}
+            cart={cart}
             initialFilters={listingFilters}
           />
         )}
@@ -140,6 +224,8 @@ export default function App() {
             isSaved={favorites.includes(selectedVehicle.id)}
             onMessageSeller={() => setCurrentView('messages')}
             onReserveViewing={handleReserveViewing}
+            onAddToCart={() => handleAddToCart(selectedVehicle)}
+            isInCart={cart.some(c => c.id === selectedVehicle.id)}
           />
         )}
 
@@ -155,7 +241,9 @@ export default function App() {
         {currentView === 'checkout' && (
           user ? (
             <BookingCheckoutPage
-              reservedVehicle={reservedVehicle || vehicles[0]}
+              reservedVehicle={reservedVehicle}
+              cart={cart}
+              onClearCart={handleClearCart}
               onCheckoutComplete={() => setCurrentView('home')}
             />
           ) : (
@@ -221,9 +309,10 @@ export default function App() {
 
         {currentView === 'cart' && (
           <CartPage
-            favorites={favorites}
-            vehicles={vehicles}
-            onToggleFavorite={handleToggleFavorite}
+            cart={cart}
+            onUpdateQuantity={handleUpdateCartQuantity}
+            onRemoveFromCart={handleRemoveFromCart}
+            onClearCart={handleClearCart}
             onNavigate={(view) => setCurrentView(view)}
           />
         )}
