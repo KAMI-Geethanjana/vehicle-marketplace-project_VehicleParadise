@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UploadCloud, CheckCircle2, ArrowRight, ArrowLeft, ScanLine, Sparkles, AlertCircle } from 'lucide-react';
 
-export default function SellVehiclePage({ onVehicleAdded }) {
+export default function SellVehiclePage({ onVehicleAdded, user }) {
   const [step, setStep] = useState(1);
   const [isScanning, setIsScanning] = useState(false);
   const [licensePlate, setLicensePlate] = useState('');
@@ -58,39 +58,68 @@ export default function SellVehiclePage({ onVehicleAdded }) {
   const handleNext = () => setStep(prev => prev + 1);
   const handlePrev = () => setStep(prev => prev - 1);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSuccess(true);
+
+    const priceNum = parseInt(formData.price, 10) || 5000000;
+    const yearNum = parseInt(formData.year, 10) || new Date().getFullYear();
+    const vehiclePayload = {
+      name: `${yearNum} ${formData.make} ${formData.model}`,
+      shortName: `${yearNum} ${formData.make} ${formData.model}`,
+      make: formData.make || 'Custom',
+      model: formData.model || 'Model',
+      year: yearNum,
+      price: priceNum,
+      stock_qty: 1,
+      priceDisplay: `Rs. ${(priceNum / 1000000).toFixed(1)}M`,
+      priceRating: 'Good Price',
+      location: formData.location || 'Colombo',
+      mileage: formData.mileage ? (formData.mileage.includes('km') ? formData.mileage : `${formData.mileage} km`) : '15,000 km',
+      fuel: formData.fuel || 'Petrol',
+      transmission: formData.transmission || 'Automatic',
+      bodyType: formData.bodyType || 'Sedan',
+      emissionClass: formData.emissionClass || 'Euro 6',
+      condition: formData.condition || 'Used',
+      category: 'Cars',
+      features: formData.features.length > 0 ? formData.features : ['Air Conditioning', 'Power Steering'],
+      verified: false,
+      seller: user?.name || 'Private Seller',
+      sellerType: 'Private Seller',
+      sellerRating: 'New',
+      image: '/hero_supercar.jpg',
+      gallery: ['/hero_supercar.jpg'],
+      description: formData.description || 'Newly listed vehicle in excellent condition.',
+      safetyAndTrust: ['Seller unverified']
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify(vehiclePayload)
+      });
+      if (res.ok) {
+        const savedProduct = await res.json();
+        setTimeout(() => {
+          onVehicleAdded(savedProduct);
+        }, 1200);
+        return;
+      }
+    } catch (err) {
+      console.error('Failed to save to backend, falling back to local state:', err);
+    }
+
     setTimeout(() => {
       onVehicleAdded({
-        id: `v_${Date.now()}`,
-        name: `${formData.year} ${formData.make} ${formData.model}`,
-        shortName: `${formData.year} ${formData.make} ${formData.model}`,
-        make: formData.make,
-        model: formData.model,
-        year: parseInt(formData.year),
-        price: parseInt(formData.price),
-        priceDisplay: `Rs. ${(parseInt(formData.price)/1000000).toFixed(1)}M`,
-        priceRating: 'Good Price',
-        location: formData.location,
-        mileage: formData.mileage,
-        fuel: formData.fuel,
-        transmission: formData.transmission,
-        bodyType: formData.bodyType,
-        emissionClass: formData.emissionClass,
-        condition: formData.condition,
-        category: 'Cars',
-        features: formData.features,
-        verified: false,
-        seller: 'Private Seller',
-        sellerType: 'Private Seller',
-        sellerRating: 'New',
-        image: '/hero_supercar.png',
-        gallery: ['/hero_supercar.png'],
-        description: formData.description || 'Newly listed vehicle.',
-        safetyAndTrust: ['Seller unverified']
+        ...vehiclePayload,
+        id: `v_${Date.now()}`
       });
-    }, 1500);
+    }, 1200);
   };
 
   const renderStepContent = () => {

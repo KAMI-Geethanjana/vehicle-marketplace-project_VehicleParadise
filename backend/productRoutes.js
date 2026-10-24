@@ -34,7 +34,7 @@ router.post('/', requireAuth, async (req, res) => {
     // Basic fields a user provides from SellVehiclePage
     const newProduct = new Product({
       ...req.body,
-      // You can also link seller if Product schema has sellerId
+      stock_qty: req.body.stock_qty || 1
     });
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);

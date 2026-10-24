@@ -4,28 +4,31 @@ const Order = require('./models/Order');
 const Product = require('./models/Product');
 const { requireAuth } = require('./authMiddleware');
 
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key_change_in_production';
 
 // POST /api/orders
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { items, total_amount, customer_name, customer_email, customer_phone } = req.body;
+    const { items, total_amount, customer_name, customer_email, customer_phone, payment_method } = req.body;
     
     // Validate cart
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'No order items' });
     }
     
-    // Update stock
+    // Update stock safely
     for (const item of items) {
-      const product = await Product.findById(item.product_id);
-      if (product) {
-        if (product.stock_qty < item.quantity) {
-          return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+      if (item.product_id && mongoose.Types.ObjectId.isValid(item.product_id)) {
+        const product = await Product.findById(item.product_id);
+        if (product) {
+          if (product.stock_qty < item.quantity) {
+            return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+          }
+          product.stock_qty -= item.quantity;
+          await product.save();
         }
-        product.stock_qty -= item.quantity;
-        await product.save();
       }
     }
 
@@ -34,6 +37,7 @@ router.post('/', requireAuth, async (req, res) => {
       customer_name,
       customer_email,
       customer_phone,
+      payment_method: payment_method || 'PayHere',
       total_amount,
       items
     });

@@ -90,6 +90,7 @@ export default function BookingCheckoutPage({ reservedVehicle, cart = [], onClea
         customer_name: `${formData.firstName} ${formData.lastName}`,
         customer_email: formData.email,
         customer_phone: formData.phone,
+        payment_method: formData.paymentMethod,
         items: hasCartItems
           ? cart.map(item => ({
               product_id: item.id,
@@ -440,9 +441,10 @@ export default function BookingCheckoutPage({ reservedVehicle, cart = [], onClea
                 {/* Payment Gateway Options */}
                 <div className="space-y-3">
                   <label className="block text-sm font-bold text-slate-800 dark:text-slate-200">
-                    Payment Gateway
+                    Payment Method
                   </label>
-                  <label className="flex items-center gap-3 p-3.5 border-2 border-amber-500 bg-amber-50/50 dark:bg-amber-500/10 rounded-2xl cursor-pointer transition-all">
+                  
+                  <label className={`flex items-center gap-3 p-3.5 border-2 rounded-2xl cursor-pointer transition-all ${formData.paymentMethod === 'PayHere' ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-dark-900'}`}>
                     <input 
                       type="radio" 
                       name="payment" 
@@ -452,10 +454,26 @@ export default function BookingCheckoutPage({ reservedVehicle, cart = [], onClea
                       className="text-amber-500 focus:ring-amber-500 w-4 h-4" 
                     />
                     <div className="flex-1">
-                      <span className="font-bold text-slate-900 dark:text-white text-sm block">PayHere Sri Lanka (Sandbox)</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-sm block">PayHere Sri Lanka (Online Sandbox)</span>
                       <span className="text-slate-500 dark:text-slate-400 text-xs">Visa, MasterCard, FriMi, Genie & Online Banking</span>
                     </div>
                     <CreditCard className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  </label>
+
+                  <label className={`flex items-center gap-3 p-3.5 border-2 rounded-2xl cursor-pointer transition-all ${formData.paymentMethod === 'BankTransfer' ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-dark-900'}`}>
+                    <input 
+                      type="radio" 
+                      name="payment" 
+                      value="BankTransfer" 
+                      checked={formData.paymentMethod === 'BankTransfer'} 
+                      onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})} 
+                      className="text-amber-500 focus:ring-amber-500 w-4 h-4" 
+                    />
+                    <div className="flex-1">
+                      <span className="font-bold text-slate-900 dark:text-white text-sm block">Pay on Inspection / Bank Deposit</span>
+                      <span className="text-slate-500 dark:text-slate-400 text-xs">Reserve now, verify vehicle in person, pay at dealership</span>
+                    </div>
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </label>
                 </div>
 

@@ -63,6 +63,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialView 
         setError('Account created successfully! Please sign in.');
       } else {
         localStorage.setItem('token', data.token); // Store token
+        localStorage.setItem('vp_user', JSON.stringify(data.user));
         onAuthSuccess(data.user);
         onClose();
       }

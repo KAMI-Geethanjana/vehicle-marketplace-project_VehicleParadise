@@ -32,6 +32,7 @@ export default function AuthPage({ onAuthSuccess }) {
       }
 
       localStorage.setItem('token', data.token);
+      localStorage.setItem('vp_user', JSON.stringify(data.user));
       onAuthSuccess(data.user);
     } catch (err) {
       setError(err.message);

@@ -39,10 +39,32 @@ export default function App() {
       });
   }, []); 
   const [theme, setTheme] = useState('light');
-  const [user, setUser] = useState(null);
+  
+  // Persistent User Authentication in localStorage
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('vp_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (user) {
+        localStorage.setItem('vp_user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('vp_user');
+      }
+    } catch (e) {
+      console.error('Failed to sync user to localStorage:', e);
+    }
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('vp_user');
     setUser(null);
     setCurrentView('home');
   };
@@ -256,7 +278,7 @@ export default function App() {
         )}
 
         {currentView === 'sell' && (
-          user ? <SellVehiclePage onVehicleAdded={handleAddUserVehicle} /> : <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('sell'); }} />
+          user ? <SellVehiclePage user={user} onVehicleAdded={handleAddUserVehicle} /> : <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('sell'); }} />
         )}
 
         {currentView === 'auth' && (
@@ -300,11 +322,32 @@ export default function App() {
         )}
 
         {currentView === 'admin' && (
-          <AdminDashboardPage />
+          user && user.role === 'admin' ? (
+            <AdminDashboardPage user={user} />
+          ) : (
+            <div className="max-w-4xl mx-auto px-4 py-12">
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-8 text-center space-y-4 mb-6">
+                <h2 className="font-outfit font-black text-2xl text-slate-900 dark:text-white">Admin Privileges Required</h2>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  Please sign in with administrator credentials (e.g. <code>admin@vehicleparadise.com / admin123</code>) to access the operations console.
+                </p>
+              </div>
+              <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('admin'); }} />
+            </div>
+          )
         )}
 
         {currentView === 'mydashboard' && (
-          user ? <MyDashboardPage onListVehicle={() => setCurrentView('sell')} onNavigateBrowse={() => setCurrentView('browse')} /> : <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('mydashboard'); }} />
+          user ? (
+            <MyDashboardPage 
+              user={user} 
+              vehicles={vehicles} 
+              onListVehicle={() => setCurrentView('sell')} 
+              onNavigateBrowse={() => setCurrentView('browse')} 
+            />
+          ) : (
+            <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('mydashboard'); }} />
+          )
         )}
 
         {currentView === 'cart' && (

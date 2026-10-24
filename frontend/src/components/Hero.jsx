@@ -22,6 +22,23 @@ export default function Hero({ onExploreClick }) {
     { name: 'Toyota', url: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg' }
   ];
 
+  const [heroLocation, setHeroLocation] = useState('Sri Lanka');
+  const [heroMake, setHeroMake] = useState('Makes and models');
+  const [heroCity, setHeroCity] = useState('');
+
+  const handleHeroSearch = () => {
+    const filters = {};
+    if (heroMake && heroMake !== 'Makes and models') {
+      filters.searchMake = heroMake;
+    }
+    if (heroLocation && heroLocation !== 'Sri Lanka') {
+      filters.searchLocation = heroLocation;
+    } else if (heroCity.trim()) {
+      filters.searchLocation = heroCity.trim();
+    }
+    onExploreClick(filters);
+  };
+
   return (
     <div className="w-full relative pb-16 bg-slate-50 dark:bg-dark-950">
       
@@ -55,7 +72,10 @@ export default function Hero({ onExploreClick }) {
             {['Cars', 'Motorcycles', 'Commercial'].map(tab => (
               <button 
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  onExploreClick({ searchMake: tab === 'Cars' ? '' : tab });
+                }}
                 className={`text-sm font-bold pb-4 -mb-4 whitespace-nowrap transition-colors ${activeTab === tab ? 'text-slate-900 dark:text-white border-b-[3px] border-slate-900 dark:border-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               >
                 {tab}
@@ -66,34 +86,50 @@ export default function Hero({ onExploreClick }) {
           {/* Search Inputs */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-6">
             <div className="md:col-span-3">
-              <select className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 appearance-none shadow-sm cursor-pointer text-slate-900 dark:text-white">
-                <option>Sri Lanka</option>
-                <option>Colombo</option>
-                <option>Kandy</option>
+              <select 
+                value={heroLocation} 
+                onChange={(e) => setHeroLocation(e.target.value)}
+                className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 appearance-none shadow-sm cursor-pointer text-slate-900 dark:text-white"
+              >
+                <option value="Sri Lanka">All Sri Lanka</option>
+                <option value="Colombo">Colombo</option>
+                <option value="Kandy">Kandy</option>
+                <option value="Galle">Galle</option>
+                <option value="Kurunegala">Kurunegala</option>
               </select>
             </div>
             <div className="md:col-span-4">
-              <select className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 appearance-none shadow-sm cursor-pointer text-slate-900 dark:text-white">
-                <option>Makes and models</option>
-                <option>Toyota</option>
-                <option>Honda</option>
-                <option>Nissan</option>
-                <option>BMW</option>
+              <select 
+                value={heroMake} 
+                onChange={(e) => setHeroMake(e.target.value)}
+                className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 appearance-none shadow-sm cursor-pointer text-slate-900 dark:text-white"
+              >
+                <option value="Makes and models">All Makes and models</option>
+                <option value="Toyota">Toyota</option>
+                <option value="Honda">Honda</option>
+                <option value="Nissan">Nissan</option>
+                <option value="BMW">BMW</option>
+                <option value="Mercedes">Mercedes-Benz</option>
+                <option value="Suzuki">Suzuki</option>
+                <option value="Yamaha">Yamaha</option>
               </select>
             </div>
             <div className="md:col-span-2">
               <input 
                 type="text" 
-                placeholder="City/ZIP" 
+                placeholder="City/District" 
+                value={heroCity}
+                onChange={(e) => setHeroCity(e.target.value)}
                 className="w-full px-4 py-3.5 bg-white dark:bg-dark-950 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 shadow-sm text-slate-900 dark:text-white placeholder-slate-400"
               />
             </div>
             <div className="md:col-span-3">
               <button 
-                onClick={onExploreClick}
-                className="w-full h-full py-3.5 bg-[#008880] hover:bg-[#007068] text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2"
+                onClick={handleHeroSearch}
+                className="w-full h-full py-3.5 bg-[#008880] hover:bg-[#007068] text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
-                2,134,574 results
+                <Search className="w-4 h-4" />
+                Find Vehicles
               </button>
             </div>
           </div>

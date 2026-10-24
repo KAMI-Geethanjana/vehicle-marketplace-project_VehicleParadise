@@ -75,6 +75,14 @@ export default function Footer({ onNavigate }) {
               </li>
               <li>
                 <button 
+                  onClick={() => onNavigate('admin')}
+                  className="text-sm text-amber-400 hover:text-amber-300 transition-colors font-semibold flex items-center gap-1.5"
+                >
+                  <span>Admin Portal</span>
+                </button>
+              </li>
+              <li>
+                <button 
                   onClick={() => onNavigate('contact')}
                   className="text-sm text-slate-400 hover:text-white transition-colors"
                 >

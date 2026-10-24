@@ -81,7 +81,7 @@ router.delete('/products/:id', async (req, res) => {
 // GET /api/admin/orders
 router.get('/orders', async (req, res) => {
   try {
-    const orders = await Order.find({}).populate('user_id', 'full_name email').sort({ created_at: -1 });
+    const orders = await Order.find({}).populate('user_id', 'full_name email').sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
