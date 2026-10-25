@@ -141,6 +141,10 @@ export default function App() {
 
   // Cart operations with input sanitization and zero/negative protection
   const handleAddToCart = (vehicle, quantity = 1) => {
+    if (vehicle.isReserved || vehicle.status === 'Reserved' || vehicle.status === 'Sold') {
+      alert('This vehicle is currently reserved under an active appointment and cannot be added to the cart.');
+      return;
+    }
     const validQty = Math.max(1, parseInt(quantity, 10) || 1);
     setCart(prev => {
       const existingIndex = prev.findIndex(item => item.id === vehicle.id);
@@ -202,6 +206,32 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleCheckoutComplete = (bookedIds = []) => {
+    if (Array.isArray(bookedIds) && bookedIds.length > 0) {
+      setVehicles(prev =>
+        prev.map(v =>
+          bookedIds.includes(v.id) || bookedIds.includes(v._id)
+            ? { ...v, isReserved: true, status: 'Reserved' }
+            : v
+        )
+      );
+      // Remove any booked vehicles from cart if they were in the cart
+      setCart(prev => prev.filter(item => !bookedIds.includes(item.id) && !bookedIds.includes(item._id)));
+    }
+    setReservedVehicle(null);
+    setCurrentView('browse');
+
+    // Sync with backend API
+    fetch('http://localhost:5000/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setVehicles(data);
+        }
+      })
+      .catch(err => console.error('Error refreshing products:', err));
+  };
+
   const handleAddUserVehicle = (newVehicle) => {
     setVehicles(prev => [newVehicle, ...prev]);
     setCurrentView('browse');
@@ -258,6 +288,16 @@ export default function App() {
           />
         )}
 
+        {currentView === 'cart' && (
+          <CartPage
+            cart={cart}
+            onUpdateQuantity={handleUpdateCartQuantity}
+            onRemoveFromCart={handleRemoveFromCart}
+            onClearCart={handleClearCart}
+            onNavigate={(view) => setCurrentView(view)}
+          />
+        )}
+
         {currentView === 'reservation' && (
           <ReservationSummaryPage
             reservedVehicle={reservedVehicle || vehicles[0]}
@@ -273,7 +313,7 @@ export default function App() {
               reservedVehicle={reservedVehicle}
               cart={cart}
               onClearCart={handleClearCart}
-              onCheckoutComplete={() => setCurrentView('home')}
+              onCheckoutComplete={handleCheckoutComplete}
             />
           ) : (
             <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('checkout'); }} />

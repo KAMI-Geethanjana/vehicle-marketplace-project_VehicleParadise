@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Heart, MessageSquare, Phone, Calendar, Gauge, Fuel, Cog, Car, Tag, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { CheckCircle2, Heart, MessageSquare, Phone, Calendar, Gauge, Fuel, Cog, Car, Tag, ShieldCheck, ShoppingCart, Lock } from 'lucide-react';
 
 export default function VehicleDetailsPage({ 
   vehicle, 
@@ -11,6 +11,8 @@ export default function VehicleDetailsPage({
   isInCart
 }) {
   if (!vehicle) return null;
+
+  const isReserved = Boolean(vehicle.isReserved || vehicle.status === 'Reserved' || vehicle.status === 'Sold');
 
   const getPriceRatingColor = (rating) => {
     switch (rating) {
@@ -25,6 +27,28 @@ export default function VehicleDetailsPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
+      {/* Reserved Alert Banner */}
+      {isReserved && (
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900/60 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-pulse-subtle">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-outfit font-black text-rose-900 dark:text-rose-200 text-base sm:text-lg flex items-center gap-2">
+                Vehicle Reserved / Under Offer
+              </h3>
+              <p className="text-rose-700 dark:text-rose-300 text-xs sm:text-sm mt-0.5">
+                An inspection appointment has already been scheduled for this vehicle. Further bookings and cart additions are temporarily disabled.
+              </p>
+            </div>
+          </div>
+          <span className="shrink-0 px-3.5 py-1.5 rounded-lg bg-rose-600 text-white font-extrabold text-xs uppercase tracking-wider shadow">
+            Booked for Viewing
+          </span>
+        </div>
+      )}
+
       {/* Title & Badge */}
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-3">
@@ -35,6 +59,12 @@ export default function VehicleDetailsPage({
             <div className="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Verified Listing</span>
+            </div>
+          )}
+          {isReserved && (
+            <div className="inline-flex items-center gap-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+              <Lock className="w-3.5 h-3.5" />
+              <span>Reserved / Under Offer</span>
             </div>
           )}
         </div>
@@ -213,21 +243,53 @@ export default function VehicleDetailsPage({
             {/* Action Buttons with finger-friendly min-h-[48px] */}
             <div className="space-y-3 pt-2">
               <button
+                disabled={isReserved}
                 onClick={() => {
-                  if (onAddToCart) onAddToCart(vehicle);
+                  if (!isReserved && onAddToCart) onAddToCart(vehicle);
                 }}
-                className={`w-full py-3.5 px-4 min-h-[48px] ${isInCart ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-800 dark:bg-dark-700 hover:bg-slate-900 text-white'} font-outfit font-extrabold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer`}
+                className={`w-full py-3.5 px-4 min-h-[48px] ${
+                  isReserved
+                    ? 'bg-slate-100 dark:bg-dark-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 cursor-not-allowed'
+                    : isInCart
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
+                    : 'bg-slate-800 dark:bg-dark-700 hover:bg-slate-900 text-white cursor-pointer'
+                } font-outfit font-extrabold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center gap-2`}
               >
-                <ShoppingCart className={`w-4 h-4 ${isInCart ? 'fill-white text-white' : ''}`} />
-                <span>{isInCart ? 'Added to Cart ✓' : 'Add to Cart'}</span>
+                {isReserved ? (
+                  <>
+                    <Lock className="w-4 h-4 text-slate-400 dark:text-slate-600" />
+                    <span>Unavailable for Cart</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className={`w-4 h-4 ${isInCart ? 'fill-white text-white' : ''}`} />
+                    <span>{isInCart ? 'Added to Cart ✓' : 'Add to Cart'}</span>
+                  </>
+                )}
               </button>
 
               <button
-                onClick={() => onReserveViewing(vehicle)}
-                className="w-full py-3.5 px-4 min-h-[48px] bg-amber-500 hover:bg-amber-600 text-white font-outfit font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                disabled={isReserved}
+                onClick={() => {
+                  if (!isReserved) onReserveViewing(vehicle);
+                }}
+                className={`w-full py-3.5 px-4 min-h-[48px] ${
+                  isReserved
+                    ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 cursor-not-allowed'
+                    : 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm cursor-pointer'
+                } font-outfit font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2`}
               >
-                <Tag className="w-4 h-4" />
-                <span>Reserve / Checkout</span>
+                {isReserved ? (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Vehicle Reserved (Under Offer)</span>
+                  </>
+                ) : (
+                  <>
+                    <Tag className="w-4 h-4" />
+                    <span>Reserve / Checkout</span>
+                  </>
+                )}
               </button>
 
               <div className="grid grid-cols-2 gap-3 pt-2">

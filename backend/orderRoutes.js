@@ -18,17 +18,24 @@ router.post('/', requireAuth, async (req, res) => {
       return res.status(400).json({ message: 'No order items' });
     }
     
-    // Update stock safely
+    // Update stock safely & mark vehicle as Reserved / Under Offer
+    const reservedProductIds = [];
     for (const item of items) {
+      let product = null;
       if (item.product_id && mongoose.Types.ObjectId.isValid(item.product_id)) {
-        const product = await Product.findById(item.product_id);
-        if (product) {
-          if (product.stock_qty < item.quantity) {
-            return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
-          }
-          product.stock_qty -= item.quantity;
-          await product.save();
-        }
+        product = await Product.findById(item.product_id);
+      } else if (item.name) {
+        product = await Product.findOne({ name: item.name });
+      }
+
+      if (product) {
+        product.stock_qty = Math.max(0, (product.stock_qty || 1) - (item.quantity || 1));
+        product.status = 'Reserved';
+        product.isReserved = true;
+        await product.save();
+        reservedProductIds.push(product._id.toString());
+      } else if (item.product_id) {
+        reservedProductIds.push(item.product_id);
       }
     }
 
@@ -43,7 +50,7 @@ router.post('/', requireAuth, async (req, res) => {
     });
 
     const createdOrder = await order.save();
-    res.status(201).json(createdOrder);
+    res.status(201).json({ ...createdOrder.toJSON(), reservedProductIds });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

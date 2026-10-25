@@ -82,6 +82,11 @@ export default function BookingCheckoutPage({ reservedVehicle, cart = [], onClea
       return;
     }
 
+    // Determine booked vehicle IDs
+    const bookedIds = hasCartItems 
+      ? cart.map(item => item.id).filter(Boolean)
+      : (reservedVehicle?.id ? [reservedVehicle.id] : []);
+
     // Save order to database
     try {
       const token = localStorage.getItem('token');
@@ -94,11 +99,13 @@ export default function BookingCheckoutPage({ reservedVehicle, cart = [], onClea
         items: hasCartItems
           ? cart.map(item => ({
               product_id: item.id,
+              name: item.name,
               quantity: parseInt(item.quantity, 10) || 1,
               unit_price: depositPerVehicle
             }))
           : [{
               product_id: reservedVehicle?.id || 'v1',
+              name: reservedVehicle?.name,
               quantity: 1,
               unit_price: depositPerVehicle
             }]
@@ -127,8 +134,8 @@ export default function BookingCheckoutPage({ reservedVehicle, cart = [], onClea
     } else {
       setIsSuccess(true);
       setTimeout(() => {
-        if (onCheckoutComplete) onCheckoutComplete();
-      }, 3000);
+        if (onCheckoutComplete) onCheckoutComplete(bookedIds);
+      }, 2500);
     }
   };
 

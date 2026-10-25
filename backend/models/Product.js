@@ -3,9 +3,10 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
-  stock_qty: { type: Number, default: 0 },
+  stock_qty: { type: Number, default: 1 },
   image: { type: String },
-  
+  status: { type: String, default: 'Available' }, // 'Available', 'Reserved', 'Sold'
+  isReserved: { type: Boolean, default: false },
 
   // Fields for frontend compatibility
   shortName: String,

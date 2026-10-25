@@ -14,7 +14,7 @@ export default function Footer({ onNavigate }) {
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed max-w-sm mt-4">
-              A student marketplace demonstration for buying and selling vehicles in Sri Lanka
+              Sri Lanka's premier digital vehicle marketplace for buying, selling, and discovering certified vehicles with confidence.
             </p>
           </div>
 

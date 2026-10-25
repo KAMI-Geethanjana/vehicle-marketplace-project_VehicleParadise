@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Hero from './Hero';
+import { Lock } from 'lucide-react';
 
 export default function HomePage({ vehicles, onSelectVehicle, onSelectCategory, onNavigateBrowse }) {
   const [ads, setAds] = useState([]);
@@ -113,6 +114,12 @@ export default function HomePage({ vehicles, onSelectVehicle, onSelectCategory, 
                     alt={v.name} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                   />
+                  {(v.isReserved || v.status === 'Reserved') && (
+                    <div className="absolute top-3 left-3 bg-rose-600/95 text-white text-[11px] font-black px-2.5 py-1 rounded-md shadow-lg flex items-center gap-1.5 uppercase tracking-wide backdrop-blur-sm z-10">
+                      <Lock className="w-3 h-3" />
+                      <span>Reserved</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-5 space-y-1">

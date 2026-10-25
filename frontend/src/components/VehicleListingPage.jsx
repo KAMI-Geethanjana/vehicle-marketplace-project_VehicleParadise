@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Filter, Check, Tag, ShoppingCart } from 'lucide-react';
+import { Heart, Filter, Check, Tag, ShoppingCart, Lock } from 'lucide-react';
 
 export default function VehicleListingPage({ 
   vehicles, 
@@ -16,6 +16,7 @@ export default function VehicleListingPage({
   const [maxPrice, setMaxPrice] = useState('');
   const [condition, setCondition] = useState('Any');
   const [yearRange, setYearRange] = useState('2015 — 2025');
+  const [hideReserved, setHideReserved] = useState(false);
   
   // New AutoScout24 Advanced Filters
   const [fuelType, setFuelType] = useState('Any');
@@ -60,6 +61,7 @@ export default function VehicleListingPage({
       if (sellerType === 'Dealer' && !v.sellerType.toLowerCase().includes('dealer')) return false;
       if (sellerType === 'Private' && !v.sellerType.toLowerCase().includes('private')) return false;
     }
+    if (hideReserved && (v.isReserved || v.status === 'Reserved')) return false;
 
     return true;
   });
@@ -247,6 +249,19 @@ export default function VehicleListingPage({
               </div>
             </div>
 
+            {/* Hide Reserved Vehicles Checkbox */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+              <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={hideReserved}
+                  onChange={(e) => setHideReserved(e.target.checked)}
+                  className="w-4 h-4 rounded text-amber-500 focus:ring-amber-400 accent-amber-500"
+                />
+                <span>Hide Reserved Vehicles</span>
+              </label>
+            </div>
+
             <button
               onClick={() => { if(window.innerWidth < 1024) setIsFilterOpen(false) }}
               className="w-full py-3 mt-4 bg-slate-900 dark:bg-slate-800 hover:bg-amber-500 text-white font-outfit font-black rounded-lg text-sm transition-all duration-300 flex items-center justify-center gap-2"
@@ -268,10 +283,11 @@ export default function VehicleListingPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
             {filteredVehicles.map((v) => {
               const isSaved = favorites.includes(v.id);
+              const isItemReserved = v.isReserved || v.status === 'Reserved';
               return (
                 <div
                   key={v.id}
-                  className="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-xl overflow-hidden shadow-sm transition-all flex flex-col justify-between group cursor-pointer"
+                  className={`bg-white dark:bg-dark-900 border ${isItemReserved ? 'border-rose-400 dark:border-rose-800/80 shadow-rose-500/5' : 'border-slate-200 dark:border-slate-800 hover:border-amber-500'} rounded-xl overflow-hidden shadow-sm transition-all flex flex-col justify-between group cursor-pointer`}
                   onClick={() => onSelectVehicle(v)}
                 >
                   <div>
@@ -279,31 +295,39 @@ export default function VehicleListingPage({
                       <img 
                         src={v.image} 
                         alt={v.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isItemReserved ? 'saturate-90' : ''}`} 
                       />
                       
-                      {/* Price Rating Label (AutoScout24 inspired) */}
-                      {v.priceRating && (
+                      {/* Reserved Badge or Price Rating Label */}
+                      {isItemReserved ? (
+                        <div className="absolute top-3 left-3 bg-rose-600/95 text-white text-[11px] font-black uppercase px-2.5 py-1 rounded-md shadow-lg backdrop-blur-md flex items-center gap-1.5 border border-rose-400/50 tracking-wider z-10">
+                          <Lock className="w-3.5 h-3.5 text-white" />
+                          RESERVED
+                        </div>
+                      ) : v.priceRating ? (
                         <div className={`absolute top-3 left-3 text-[10px] font-bold px-2 py-1 rounded-md border backdrop-blur-md flex items-center gap-1 uppercase tracking-wide ${getPriceRatingColor(v.priceRating)}`}>
                           <Tag className="w-3 h-3" />
                           {v.priceRating}
                         </div>
-                      )}
+                      ) : null}
 
                       {/* Favorite and Quick Cart Buttons */}
                       <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                         <button
                           type="button"
+                          disabled={isItemReserved}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (onAddToCart) onAddToCart(v);
+                            if (!isItemReserved && onAddToCart) onAddToCart(v);
                           }}
                           className={`p-2 rounded-full backdrop-blur-md border transition-all ${
-                            Array.isArray(cart) && cart.some(c => c.id === v.id)
-                              ? 'bg-amber-500 text-white border-amber-500 shadow-md'
-                              : 'bg-white/90 dark:bg-dark-900/90 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-amber-500 hover:bg-white'
+                            isItemReserved
+                              ? 'bg-slate-200/80 dark:bg-dark-800/80 text-slate-400 border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-60'
+                              : Array.isArray(cart) && cart.some(c => c.id === v.id)
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-md'
+                                : 'bg-white/90 dark:bg-dark-900/90 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-amber-500 hover:bg-white'
                           }`}
-                          title={Array.isArray(cart) && cart.some(c => c.id === v.id) ? 'In Cart' : 'Add to Cart'}
+                          title={isItemReserved ? 'Vehicle is Reserved' : (Array.isArray(cart) && cart.some(c => c.id === v.id) ? 'In Cart' : 'Add to Cart')}
                           aria-label="Add to cart"
                         >
                           <ShoppingCart className="w-4 h-4" />
@@ -325,9 +349,16 @@ export default function VehicleListingPage({
                     </div>
 
                     <div className="p-4 space-y-2">
-                      <h3 className="font-outfit font-bold text-slate-900 dark:text-white text-base leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 line-clamp-1">
-                        {v.make} {v.model}
-                      </h3>
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-outfit font-bold text-slate-900 dark:text-white text-base leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 line-clamp-1">
+                          {v.make} {v.model}
+                        </h3>
+                        {isItemReserved && (
+                          <span className="shrink-0 text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
+                            Booked
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xl font-black text-slate-900 dark:text-white">
                         {v.priceDisplay}
                       </div>
