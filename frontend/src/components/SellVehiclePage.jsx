@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { UploadCloud, CheckCircle2, ArrowRight, ArrowLeft, ScanLine, Sparkles, AlertCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { UploadCloud, CheckCircle2, ArrowRight, ArrowLeft, ScanLine, Sparkles, AlertCircle, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 export default function SellVehiclePage({ onVehicleAdded, user }) {
   const [step, setStep] = useState(1);
   const [isScanning, setIsScanning] = useState(false);
   const [licensePlate, setLicensePlate] = useState('');
+  const fileInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
     make: '',
@@ -19,9 +20,11 @@ export default function SellVehiclePage({ onVehicleAdded, user }) {
     location: 'Colombo',
     price: '',
     description: '',
-    features: []
+    features: [],
+    imageUrl: ''
   });
 
+  const [photoPreview, setPhotoPreview] = useState('/toyota_axio.jpg');
   const [isSuccess, setIsSuccess] = useState(false);
 
   const availableFeatures = ['Sunroof', 'Leather Seats', 'Cruise Control', 'Navigation System', 'Alloy Wheels', 'Bluetooth', 'Parking Sensors', 'Reverse Camera'];
@@ -64,6 +67,7 @@ export default function SellVehiclePage({ onVehicleAdded, user }) {
 
     const priceNum = parseInt(formData.price, 10) || 5000000;
     const yearNum = parseInt(formData.year, 10) || new Date().getFullYear();
+    const finalImage = photoPreview || formData.imageUrl || (formData.bodyType === 'SUV' ? '/toyota_prado.jpg' : '/toyota_axio.jpg');
     const vehiclePayload = {
       name: `${yearNum} ${formData.make} ${formData.model}`,
       shortName: `${yearNum} ${formData.make} ${formData.model}`,
@@ -81,14 +85,14 @@ export default function SellVehiclePage({ onVehicleAdded, user }) {
       bodyType: formData.bodyType || 'Sedan',
       emissionClass: formData.emissionClass || 'Euro 6',
       condition: formData.condition || 'Used',
-      category: 'Cars',
+      category: formData.bodyType === 'SUV' ? 'SUVs' : (formData.fuel === 'Electric' ? 'Electric' : 'Cars'),
       features: formData.features.length > 0 ? formData.features : ['Air Conditioning', 'Power Steering'],
       verified: false,
       seller: user?.name || 'Private Seller',
       sellerType: 'Private Seller',
       sellerRating: 'New',
-      image: '/hero_supercar.jpg',
-      gallery: ['/hero_supercar.jpg'],
+      image: finalImage,
+      gallery: [finalImage],
       description: formData.description || 'Newly listed vehicle in excellent condition.',
       safetyAndTrust: ['Seller unverified']
     };
@@ -276,16 +280,126 @@ export default function SellVehiclePage({ onVehicleAdded, user }) {
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <h2 className="font-outfit font-bold text-xl text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3">
-              Upload Photos
+              Vehicle Photo
             </h2>
-            <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center space-y-3 bg-slate-50 dark:bg-dark-900/50 hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors cursor-pointer">
-              <UploadCloud className="w-10 h-10 text-amber-500 mx-auto" />
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Drag and drop your photos here, or <span className="text-amber-500 underline">browse</span>
-              </p>
-              <p className="text-xs text-slate-500">
-                You can add up to 15 photos. Listings with high-quality photos get 3x more views!
-              </p>
+
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setPhotoPreview(reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+
+            {/* Photo preview or dropzone */}
+            {photoPreview ? (
+              <div className="relative rounded-2xl overflow-hidden border-2 border-amber-500 bg-slate-900 aspect-[16/10] max-h-72 group">
+                <img
+                  src={photoPreview}
+                  alt="Vehicle preview"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 bg-white text-slate-900 font-semibold rounded-lg text-sm shadow hover:bg-slate-100 transition"
+                  >
+                    Change Photo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPhotoPreview('')}
+                    className="p-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition"
+                    title="Remove Photo"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="absolute bottom-2 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-md text-xs text-white flex items-center gap-1.5 font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Photo Selected Ready
+                </div>
+              </div>
+            ) : (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-10 text-center space-y-3 bg-slate-50 dark:bg-dark-900/50 hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors cursor-pointer"
+              >
+                <UploadCloud className="w-10 h-10 text-amber-500 mx-auto" />
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Click to select photo from your computer, or <span className="text-amber-500 underline">browse</span>
+                </p>
+                <p className="text-xs text-slate-500">
+                  PNG, JPG, or WEBP up to 10MB
+                </p>
+              </div>
+            )}
+
+            {/* Quick Demo Presets */}
+            <div className="pt-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                Or pick a quick demo vehicle photo:
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPhotoPreview('/toyota_axio.jpg')}
+                  className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${
+                    photoPreview === '/toyota_axio.jpg'
+                      ? 'border-amber-500 bg-amber-500/10 dark:bg-amber-500/20'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-dark-900'
+                  }`}
+                >
+                  <img src="/toyota_axio.jpg" alt="Toyota Axio" className="w-12 h-10 object-cover rounded-lg shrink-0" />
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">Toyota Axio / Sedan</p>
+                    <p className="text-[10px] text-slate-500">Pearl White Hybrid</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPhotoPreview('/toyota_prado.jpg')}
+                  className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${
+                    photoPreview === '/toyota_prado.jpg'
+                      ? 'border-amber-500 bg-amber-500/10 dark:bg-amber-500/20'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-dark-900'
+                  }`}
+                >
+                  <img src="/toyota_prado.jpg" alt="Toyota Prado" className="w-12 h-10 object-cover rounded-lg shrink-0" />
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">Toyota Prado / SUV</p>
+                    <p className="text-[10px] text-slate-500">Silver Metallic 4WD</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Custom Image URL Option */}
+            <div className="pt-2">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Or paste direct Image URL:
+              </label>
+              <input
+                type="url"
+                value={formData.imageUrl || ''}
+                onChange={(e) => {
+                  setFormData({ ...formData, imageUrl: e.target.value });
+                  if (e.target.value) setPhotoPreview(e.target.value);
+                }}
+                placeholder="https://images.unsplash.com/..."
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-amber-500"
+              />
             </div>
           </div>
         );
