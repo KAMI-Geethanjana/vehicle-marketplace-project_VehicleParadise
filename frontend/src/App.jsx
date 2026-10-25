@@ -21,15 +21,22 @@ import CartPage from './components/CartPage';
 import { VEHICLES } from './data/vehicles';
 
 export default function App() {
-  const [vehicles, setVehicles] = useState([]);
+  const [vehicles, setVehicles] = useState(VEHICLES);
   const [currentView, setCurrentView] = useState('home'); 
   const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/products')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+      })
       .then(data => {
-        setVehicles(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setVehicles(data);
+        } else {
+          setVehicles(VEHICLES);
+        }
         setLoadingProducts(false);
       })
       .catch(err => {
@@ -293,9 +300,12 @@ export default function App() {
 
         {currentView === 'favorites' && (
           <FavoritesPage
-            favorites={vehicles.filter(v => favorites.includes(v.id))}
+            vehicles={Array.isArray(vehicles) && vehicles.length > 0 ? vehicles : VEHICLES}
+            favorites={favorites}
+            onToggleFavorite={handleToggleFavorite}
             onSelectVehicle={handleSelectVehicle}
             onNavigateCompare={() => setCurrentView('compare')}
+            onNavigateBrowse={() => setCurrentView('browse')}
           />
         )}
 

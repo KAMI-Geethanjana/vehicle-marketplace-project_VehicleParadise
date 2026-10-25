@@ -1,9 +1,9 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 
-export default function ComparePage({ vehicles, onAddMoreToCompare }) {
+export default function ComparePage({ vehicles = [], onAddMoreToCompare }) {
   // Use first 3 vehicles for comparison matrix
-  const compareItems = vehicles.slice(0, 3);
+  const compareItems = Array.isArray(vehicles) ? vehicles.slice(0, 3) : [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
