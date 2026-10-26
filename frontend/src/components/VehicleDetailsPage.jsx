@@ -12,7 +12,9 @@ export default function VehicleDetailsPage({
 }) {
   if (!vehicle) return null;
 
+  const isOutOfStock = Boolean(vehicle.stock_qty !== undefined && vehicle.stock_qty <= 0);
   const isReserved = Boolean(vehicle.isReserved || vehicle.status === 'Reserved' || vehicle.status === 'Sold');
+  const isUnavailable = isReserved || isOutOfStock;
 
   const getPriceRatingColor = (rating) => {
     switch (rating) {
@@ -27,8 +29,8 @@ export default function VehicleDetailsPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
-      {/* Reserved Alert Banner */}
-      {isReserved && (
+      {/* Reserved / Out of Stock Alert Banner */}
+      {isUnavailable && (
         <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900/60 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-pulse-subtle">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
@@ -36,15 +38,17 @@ export default function VehicleDetailsPage({
             </div>
             <div>
               <h3 className="font-outfit font-black text-rose-900 dark:text-rose-200 text-base sm:text-lg flex items-center gap-2">
-                Vehicle Reserved / Under Offer
+                {isOutOfStock ? 'Vehicle Out of Stock / Sold' : 'Vehicle Reserved / Under Offer'}
               </h3>
               <p className="text-rose-700 dark:text-rose-300 text-xs sm:text-sm mt-0.5">
-                An inspection appointment has already been scheduled for this vehicle. Further bookings and cart additions are temporarily disabled.
+                {isOutOfStock 
+                  ? 'This listing currently has zero inventory in stock. New reservations and purchases are disabled.' 
+                  : 'An inspection appointment has already been scheduled for this vehicle. Further bookings are temporarily disabled.'}
               </p>
             </div>
           </div>
           <span className="shrink-0 px-3.5 py-1.5 rounded-lg bg-rose-600 text-white font-extrabold text-xs uppercase tracking-wider shadow">
-            Booked for Viewing
+            {isOutOfStock ? 'Out of Stock' : 'Booked for Viewing'}
           </span>
         </div>
       )}
@@ -243,22 +247,22 @@ export default function VehicleDetailsPage({
             {/* Action Buttons with finger-friendly min-h-[48px] */}
             <div className="space-y-3 pt-2">
               <button
-                disabled={isReserved}
+                disabled={isUnavailable}
                 onClick={() => {
-                  if (!isReserved && onAddToCart) onAddToCart(vehicle);
+                  if (!isUnavailable && onAddToCart) onAddToCart(vehicle);
                 }}
                 className={`w-full py-3.5 px-4 min-h-[48px] ${
-                  isReserved
+                  isUnavailable
                     ? 'bg-slate-100 dark:bg-dark-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 cursor-not-allowed'
                     : isInCart
                     ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
                     : 'bg-slate-800 dark:bg-dark-700 hover:bg-slate-900 text-white cursor-pointer'
                 } font-outfit font-extrabold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center gap-2`}
               >
-                {isReserved ? (
+                {isUnavailable ? (
                   <>
                     <Lock className="w-4 h-4 text-slate-400 dark:text-slate-600" />
-                    <span>Unavailable for Cart</span>
+                    <span>{isOutOfStock ? 'Out of Stock' : 'Unavailable for Cart'}</span>
                   </>
                 ) : (
                   <>
@@ -269,20 +273,20 @@ export default function VehicleDetailsPage({
               </button>
 
               <button
-                disabled={isReserved}
+                disabled={isUnavailable}
                 onClick={() => {
-                  if (!isReserved) onReserveViewing(vehicle);
+                  if (!isUnavailable) onReserveViewing(vehicle);
                 }}
                 className={`w-full py-3.5 px-4 min-h-[48px] ${
-                  isReserved
+                  isUnavailable
                     ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 cursor-not-allowed'
                     : 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm cursor-pointer'
                 } font-outfit font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2`}
               >
-                {isReserved ? (
+                {isUnavailable ? (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Vehicle Reserved (Under Offer)</span>
+                    <span>{isOutOfStock ? 'Sold Out / Unavailable' : 'Vehicle Reserved (Under Offer)'}</span>
                   </>
                 ) : (
                   <>
@@ -292,21 +296,14 @@ export default function VehicleDetailsPage({
                 )}
               </button>
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  onClick={() => onMessageSeller(vehicle.seller)}
-                  className="py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-900 dark:text-white font-outfit font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2"
+              <div className="pt-2">
+                <a
+                  href="tel:+94112345678"
+                  className="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-900 dark:text-white font-outfit font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Message</span>
-                </button>
-                
-                <button
-                  className="py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-900 dark:text-white font-outfit font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2"
-                >
-                  <Phone className="w-4 h-4" />
-                  <span>Call</span>
-                </button>
+                  <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Call Dealer Hotline (+94 11 234 5678)</span>
+                </a>
               </div>
             </div>
 

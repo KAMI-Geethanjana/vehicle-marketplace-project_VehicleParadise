@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, CheckCircle2, MessageSquare, Car } from 'lucide-react';
+import { Search, CheckCircle2, Phone, Car } from 'lucide-react';
 import { DEALERS } from '../data/vehicles';
 
 export default function DealersPage({ onNavigateBrowse, onContactDealer }) {
@@ -118,10 +118,10 @@ export default function DealersPage({ onNavigateBrowse, onContactDealer }) {
 
             <button
               onClick={() => onContactDealer(selectedDealer.name)}
-              className="px-6 py-3 bg-slate-900 dark:bg-dark-900 hover:bg-slate-800 text-white font-outfit font-bold rounded-xl text-xs shadow-sm flex items-center gap-2"
+              className="px-6 py-3 bg-slate-900 dark:bg-dark-900 hover:bg-slate-800 text-white font-outfit font-bold rounded-xl text-xs shadow-sm flex items-center gap-2 cursor-pointer"
             >
-              <MessageSquare className="w-4 h-4" />
-              <span>Contact dealer</span>
+              <Phone className="w-4 h-4" />
+              <span>Contact Hotline</span>
             </button>
           </div>
 

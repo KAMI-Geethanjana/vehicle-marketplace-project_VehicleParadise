@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Product = require('./models/Product');
 
-// GET /api/products
+// GET /api/products (Public catalog: only returns in-stock vehicles)
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ createdAt: -1 });
+    const products = await Product.find({ stock_qty: { $gt: 0 } }).sort({ createdAt: -1 });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });

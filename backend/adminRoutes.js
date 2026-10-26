@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Product = require('./models/Product');
 const Order = require('./models/Order');
+const User = require('./models/User');
 const { requireAuth, requireAdmin } = require('./authMiddleware');
 
 router.use(requireAuth, requireAdmin);
@@ -11,6 +12,7 @@ router.get('/summary', async (req, res) => {
   try {
     const productsCount = await Product.countDocuments();
     const ordersCount = await Order.countDocuments();
+    const usersCount = await User.countDocuments();
     
     // Low stock: e.g. stock_qty < 5
     const lowStockCount = await Product.countDocuments({ stock_qty: { $lt: 5 } });
@@ -18,8 +20,33 @@ router.get('/summary', async (req, res) => {
     res.json({
       products: productsCount,
       orders: ordersCount,
+      users: usersCount,
       lowStock: lowStockCount
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET /api/admin/users - List all users (Guideline: Manage users)
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({}, '-password_hash').sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE /api/admin/users/:id - Delete a user
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (user) {
+      res.json({ message: 'User deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -61,15 +88,11 @@ router.put('/products/:id', async (req, res) => {
 });
 
 // DELETE /api/admin/products/:id
-// Using soft delete by setting stock to 0 or adding an active flag?
-// PDF suggests "Prefer soft-delete if orders reference it." Let's just set stock_qty to 0.
 router.delete('/products/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
     if (product) {
-      product.stock_qty = 0; // Soft delete
-      await product.save();
-      res.json({ message: 'Product deactivated (stock set to 0)' });
+      res.json({ message: 'Product deleted successfully' });
     } else {
       res.status(404).json({ message: 'Product not found' });
     }

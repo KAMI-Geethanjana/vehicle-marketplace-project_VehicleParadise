@@ -5,7 +5,6 @@ import VehicleListingPage from './components/VehicleListingPage';
 import VehicleDetailsPage from './components/VehicleDetailsPage';
 import ReservationSummaryPage from './components/ReservationSummaryPage';
 import BookingCheckoutPage from './components/BookingCheckoutPage';
-import MessagesPage from './components/MessagesPage';
 import SellVehiclePage from './components/SellVehiclePage';
 import AuthPage from './components/AuthPage';
 import FavoritesPage from './components/FavoritesPage';
@@ -25,7 +24,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home'); 
   const [loadingProducts, setLoadingProducts] = useState(true);
 
-  useEffect(() => {
+  const refreshProducts = () => {
     fetch('http://localhost:5000/api/products')
       .then(res => {
         if (!res.ok) throw new Error('Network error');
@@ -44,6 +43,10 @@ export default function App() {
         setVehicles(VEHICLES); // Fallback to hardcoded if backend is down
         setLoadingProducts(false);
       });
+  };
+
+  useEffect(() => {
+    refreshProducts();
   }, []); 
   const [theme, setTheme] = useState('light');
   
@@ -141,8 +144,8 @@ export default function App() {
 
   // Cart operations with input sanitization and zero/negative protection
   const handleAddToCart = (vehicle, quantity = 1) => {
-    if (vehicle.isReserved || vehicle.status === 'Reserved' || vehicle.status === 'Sold') {
-      alert('This vehicle is currently reserved under an active appointment and cannot be added to the cart.');
+    if (vehicle.isReserved || vehicle.status === 'Reserved' || vehicle.status === 'Sold' || (vehicle.stock_qty !== undefined && vehicle.stock_qty <= 0)) {
+      alert('This vehicle is currently out of stock or reserved and cannot be added to the cart.');
       return;
     }
     const validQty = Math.max(1, parseInt(quantity, 10) || 1);
@@ -248,7 +251,6 @@ export default function App() {
         toggleTheme={toggleTheme}
         favoritesCount={favorites.length}
         cartCount={cartCount}
-        unreadMessagesCount={1}
         user={user}
         onLogout={handleLogout}
       />
@@ -281,7 +283,7 @@ export default function App() {
             vehicle={selectedVehicle}
             onSaveVehicle={() => handleToggleFavorite(selectedVehicle.id)}
             isSaved={favorites.includes(selectedVehicle.id)}
-            onMessageSeller={() => setCurrentView('messages')}
+            onMessageSeller={(seller) => alert(`Connecting to ${seller || 'Dealer'} support hotline: +94 11 234 5678`)}
             onReserveViewing={handleReserveViewing}
             onAddToCart={() => handleAddToCart(selectedVehicle)}
             isInCart={cart.some(c => c.id === selectedVehicle.id)}
@@ -318,10 +320,6 @@ export default function App() {
           ) : (
             <AuthPage onAuthSuccess={(u) => { setUser(u); setCurrentView('checkout'); }} />
           )
-        )}
-
-        {currentView === 'messages' && (
-          <MessagesPage />
         )}
 
         {currentView === 'sell' && (
@@ -367,13 +365,13 @@ export default function App() {
         {currentView === 'dealers' && (
           <DealersPage
             onNavigateBrowse={(dealerName) => handleNavigateBrowse({ searchMake: dealerName })}
-            onContactDealer={() => setCurrentView('messages')}
+            onContactDealer={(dealer) => alert(`Direct Dealer Hotline for ${dealer || 'Official Dealer'}: +94 11 234 5678`)}
           />
         )}
 
         {currentView === 'admin' && (
           user && user.role === 'admin' ? (
-            <AdminDashboardPage user={user} />
+            <AdminDashboardPage user={user} onNavigate={setCurrentView} onRefreshProducts={refreshProducts} />
           ) : (
             <div className="max-w-4xl mx-auto px-4 py-12">
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-8 text-center space-y-4 mb-6">

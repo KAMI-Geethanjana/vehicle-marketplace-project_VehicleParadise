@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Filter, Check, Tag, ShoppingCart, Lock } from 'lucide-react';
+import { Heart, Filter, Check, Tag, ShoppingCart, Lock, Search, X } from 'lucide-react';
 
 export default function VehicleListingPage({ 
   vehicles, 
@@ -10,6 +10,7 @@ export default function VehicleListingPage({
   cart = [],
   initialFilters = {} 
 }) {
+  const [searchKeyword, setSearchKeyword] = useState(initialFilters.searchKeyword || '');
   const [selectedMake, setSelectedMake] = useState(initialFilters.searchMake || 'All makes');
   const [selectedLocation, setSelectedLocation] = useState(initialFilters.searchLocation || 'All locations');
   const [minPrice, setMinPrice] = useState('');
@@ -29,6 +30,20 @@ export default function VehicleListingPage({
 
   // Filter application
   const filteredVehicles = vehicles.filter((v) => {
+    // Keyword search filter (Search by make, model, name, location, category, fuel)
+    if (searchKeyword.trim()) {
+      const q = searchKeyword.toLowerCase().trim();
+      const matchName = v.name?.toLowerCase().includes(q);
+      const matchMake = v.make?.toLowerCase().includes(q);
+      const matchModel = v.model?.toLowerCase().includes(q);
+      const matchLocation = v.location?.toLowerCase().includes(q);
+      const matchCategory = v.category?.toLowerCase().includes(q);
+      const matchFuel = v.fuel?.toLowerCase().includes(q);
+      if (!matchName && !matchMake && !matchModel && !matchLocation && !matchCategory && !matchFuel) {
+        return false;
+      }
+    }
+
     if (selectedMake !== 'All makes' && !v.make.toLowerCase().includes(selectedMake.toLowerCase()) && !v.name.toLowerCase().includes(selectedMake.toLowerCase())) {
       return false;
     }
@@ -110,6 +125,29 @@ export default function VehicleListingPage({
           </div>
 
           <div className="space-y-6 text-sm">
+            {/* Search Keyword */}
+            <div className="space-y-1.5">
+              <label className="block text-slate-700 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">Search Keyword</label>
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="e.g. Prius, Vezel, Kandy..."
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                />
+                {searchKeyword && (
+                  <button
+                    onClick={() => setSearchKeyword('')}
+                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Make / model */}
             <div className="space-y-1.5">
               <label className="block text-slate-700 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">Make</label>
@@ -275,8 +313,39 @@ export default function VehicleListingPage({
 
         {/* Right Vehicles Grid */}
         <main className="lg:col-span-9 space-y-4">
+          
+          {/* Prominent Search Bar (Guideline: Search Functionality) */}
+          <div className="relative bg-white dark:bg-dark-900 p-2 sm:p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3">
+            <div className="pl-3 text-amber-500">
+              <Search className="w-5 h-5" />
+            </div>
+            <input 
+              type="text"
+              placeholder="Search vehicles by make, model, name, or keyword (e.g. Toyota, Prius, Vezel, Colombo, Hybrid)..."
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              className="w-full bg-transparent border-0 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-0 min-h-[44px]"
+            />
+            {searchKeyword && (
+              <button 
+                onClick={() => setSearchKeyword('')}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full cursor-pointer mr-1"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            <button 
+              className="hidden sm:flex px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs shadow-md shrink-0 cursor-pointer"
+            >
+              Search
+            </button>
+          </div>
+
           <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-dark-900 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800">
-            <span className="font-medium">{filteredVehicles.length} results found</span>
+            <span className="font-medium">
+              {filteredVehicles.length} results found {searchKeyword && <span>for "<strong>{searchKeyword}</strong>"</span>}
+            </span>
             <span>Sort by: <strong className="text-slate-800 dark:text-slate-200">Relevance</strong></span>
           </div>
 

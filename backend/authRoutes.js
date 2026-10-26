@@ -77,6 +77,30 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// POST /api/reset-password (Guideline: Password reset option)
+router.post('/reset-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+  if (!email || !newPassword) {
+    return res.status(400).json({ error: 'Email and new password are required' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'No user account found with this email' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password_hash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ success: true, message: 'Password has been reset successfully! You can now log in.' });
+  } catch (error) {
+    console.error('Password reset error:', error);
+    res.status(500).json({ error: 'Server error during password reset' });
+  }
+});
+
 // POST /api/logout
 router.post('/logout', (req, res) => {
   res.clearCookie('token');

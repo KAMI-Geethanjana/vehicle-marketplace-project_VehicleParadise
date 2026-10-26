@@ -8,7 +8,6 @@ export default function Navbar({
   toggleTheme, 
   favoritesCount = 0, 
   cartCount = 0,
-  unreadMessagesCount,
   user,
   onLogout
 }) {
@@ -78,17 +77,6 @@ export default function Navbar({
                 <Heart className={`w-5 h-5 ${currentView === 'favorites' ? 'fill-amber-500' : ''}`} />
                 {favoritesCount > 0 && (
                   <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-dark-950 rounded-full"></span>
-                )}
-              </button>
-
-              <button 
-                onClick={() => setCurrentView('messages')}
-                className={`p-2.5 rounded-full relative transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${currentView === 'messages' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-dark-800'}`}
-                title="Messages"
-              >
-                <MessageSquare className={`w-5 h-5 ${currentView === 'messages' ? 'fill-amber-500' : ''}`} />
-                {unreadMessagesCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-500 border-2 border-white dark:border-dark-950 rounded-full animate-pulse"></span>
                 )}
               </button>
 
@@ -220,10 +208,10 @@ export default function Navbar({
                 <Heart className="w-4 h-4 text-amber-500" /> Favorites
               </button>
               <button 
-                onClick={() => { setCurrentView('messages'); setMobileMenuOpen(false); }}
+                onClick={() => { setCurrentView('cart'); setMobileMenuOpen(false); }}
                 className="flex items-center justify-center gap-2 p-3 bg-slate-50 dark:bg-dark-900 rounded-xl font-bold text-sm text-slate-700 dark:text-slate-300"
               >
-                <MessageSquare className="w-4 h-4 text-amber-500" /> Messages
+                <ShoppingCart className="w-4 h-4 text-amber-500" /> Cart ({cartCount})
               </button>
             </div>
             
