@@ -1,0 +1,101 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@config "../tailwind.config.js";
+
+/* Vehicle Paradise - Bootstrap 5 Theme Extensions */
+
+:root,
+.light {
+  --vp-bg-main: #f8fafc;
+  --vp-bg-card: #ffffff;
+  --vp-border: #e2e8f0;
+  --vp-text: #0f172a;
+  --vp-muted: #64748b;
+  --vp-amber: #d97706;
+}
+
+.dark {
+  --vp-bg-main: #0b0f19;
+  --vp-bg-card: #111827;
+  --vp-border: #374151;
+  --vp-text: #f8fafc;
+  --vp-muted: #94a3b8;
+  --vp-amber: #f59e0b;
+}
+
+html,
+body {
+  overflow-x: hidden !important;
+  max-width: 100vw;
+  width: 100%;
+}
+
+body {
+  background-color: var(--vp-bg-main) !important;
+  color: var(--vp-text) !important;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  min-height: 100vh;
+}
+
+/* Mobile responsive fixes: Ensure images never cause horizontal overflow (Slide 6 & 9) */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+.card {
+  background-color: var(--vp-bg-card) !important;
+  border-color: var(--vp-border) !important;
+  color: var(--vp-text) !important;
+  border-radius: 1rem;
+}
+
+.form-control,
+.form-select {
+  background-color: var(--vp-bg-card) !important;
+  border-color: var(--vp-border) !important;
+  color: var(--vp-text) !important;
+  border-radius: 0.75rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--vp-amber) !important;
+  box-shadow: 0 0 0 0.25rem rgba(217, 119, 6, 0.25) !important;
+}
+
+.btn-custom-dark {
+  background-color: #1e293b;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  border-radius: 0.75rem;
+}
+
+.btn-custom-dark:hover {
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+.btn-custom-gold {
+  background-color: var(--vp-amber);
+  color: #0f172a;
+  border: none;
+  font-weight: 800;
+  border-radius: 0.75rem;
+}
+
+.btn-custom-gold:hover {
+  background-color: #b45309;
+  color: #ffffff;
+}
