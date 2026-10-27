@@ -24,7 +24,7 @@ export default function SellVehiclePage({ onVehicleAdded, user }) {
     imageUrl: ''
   });
 
-  const [photoPreview, setPhotoPreview] = useState('/toyota_axio.jpg');
+  const [photoPreview, setPhotoPreview] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
   const availableFeatures = ['Sunroof', 'Leather Seats', 'Cruise Control', 'Navigation System', 'Alloy Wheels', 'Bluetooth', 'Parking Sensors', 'Reverse Camera'];
